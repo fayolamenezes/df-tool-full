@@ -35,7 +35,10 @@ import {
   SquareArrowOutUpRight,
   // New for Leads header
   Settings,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Wifi,
+  ThumbsUp,
+  ThumbsDown
 } from "lucide-react";
 import { useEffect, useRef, useState, useMemo, useLayoutEffect } from "react";
 
@@ -330,6 +333,51 @@ export default function Dashboard() {
       raf = requestAnimationFrame(tick);
       return () => cancelAnimationFrame(raf);
     }, []);
+
+    // ---- "New on page SEO opportunity" table: shared progress 0→1 ----
+    const SEO_TABLE_DURATION = 900;
+    const [seoTableProg, setSeoTableProg] = useState(0);
+    useLayoutEffect(() => {
+      const start = performance.now();
+      let raf;
+      const tick = (now) => {
+        const t = Math.min(1, (now - start) / SEO_TABLE_DURATION);
+        const ease = 1 - Math.pow(1 - t, 3); // easeOutCubic
+        setSeoTableProg(ease);
+        if (t < 1) raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+      return () => cancelAnimationFrame(raf);
+    }, []);
+
+    // color-coded animated difficulty bar
+    function DifficultyBar({ value, progress = 1 }) {
+      const pct = Math.max(0, Math.min(100, value));
+      const fill = pct < 40 ? "#EF4444" : pct < 70 ? "#F59E0B" : "#10B981";
+      return (
+        <div className="relative h-2 w-24 overflow-hidden rounded-full bg-[#E5E7EB]">
+          <div
+            className="h-2 rounded-full"
+            style={{
+              width: `${pct * progress}%`,
+              backgroundColor: fill,
+              transition: "width 140ms linear",
+            }}
+          />
+        </div>
+      );
+    }
+
+    // table data (same rows as the screenshot)
+    const seoRows = [
+      { keyword: "How to fix slow Wi-Fi", type: "Informational", volume: 7032, difficulty: 98 },
+      { keyword: "How to fix slow Wi-Fi", type: "Informational", volume: 7032, difficulty: 88 },
+      { keyword: "How to fix slow Wi-Fi", type: "Transactional", volume: 7032, difficulty: 98 },
+      { keyword: "How to fix slow Wi-Fi", type: "Informational", volume: 7032, difficulty: 28 },
+      { keyword: "How to fix slow Wi-Fi", type: "Transactional", volume: 7032, difficulty: 28 },
+      { keyword: "How to fix slow Wi-Fi", type: "Transactional", volume: 7032, difficulty: 68 },
+      { keyword: "How to fix slow Wi-Fi", type: "Informational", volume: 7032, difficulty: 48 },
+    ];
 
     // simple count-up hook
     function useCountUp(target, duration = 900) {
@@ -1397,7 +1445,7 @@ export default function Dashboard() {
             </div>
 
             {/* cards */}
-            <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+            <div className="grid grid-cols-1 gap-5 xl:grid-cols-2 items-stretch">
               <OpportunityCard
                 title="How to Improve Site Speed"
                 score={45}
@@ -1405,6 +1453,7 @@ export default function Dashboard() {
                 keywords={50}
                 status="Published"
                 progress={oppCardsProgress}
+                className="h-full"
               />
               <OpportunityCard
                 title="Complete Local SEO Guide"
@@ -1413,6 +1462,7 @@ export default function Dashboard() {
                 keywords={3}
                 status="Draft"
                 progress={oppCardsProgress}
+                className="h-full"
               />
             </div>
 
@@ -1466,6 +1516,94 @@ export default function Dashboard() {
             </div>
           </div>
         </section>
+
+        {/* ===== New on page SEO opportunity (table) ===== */}
+        <h2 className="text-[16px] font-bold text-gray-900 mb-2 ml-1">
+          New on page SEO opportunity
+        </h2>
+        <p className="ml-1 mb-4 text-[12px] text-[#6B7280]">
+          *While it’s highly recommended to follow the AI’s suggested plan for optimal results,
+          feel free to generate content based on your personal choice.
+        </p>
+
+        <div className="overflow-hidden rounded-[16px] border border-[#E7EAF0] bg-white shadow-sm">
+          {/* table header */}
+          <div className="hidden md:grid grid-cols-[2fr_1.1fr_1.1fr_1.3fr_2fr_1fr_1fr_1fr] items-center px-4 py-3 text-[12px] font-semibold text-[#4B5563] bg-[#F8FAFC]">
+            <div>Keywords</div>
+            <div>Type <span className="opacity-50">↑↓</span></div>
+            <div>Search Volume</div>
+            <div>SEO Difficulty</div>
+            <div>Suggested topic</div>
+            <div>Blog</div>
+            <div>Page</div>
+            <div>Preference</div>
+          </div>
+
+          {/* rows */}
+          <ul className="divide-y divide-[#ECEFF5]">
+            {seoRows.map((row, i) => (
+              <li
+                key={i}
+                className="grid grid-cols-1 md:grid-cols-[2fr_1.1fr_1.1fr_1.3fr_2fr_1fr_1fr_1fr] items-center gap-3 px-4 py-3 text-[13px] hover:bg-[#FAFBFD]"
+              >
+                {/* Keywords */}
+                <div className="flex items-center gap-2 text-[#2B3040]">
+                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#F3F4F6] text-[#6B7280]">
+                    <Wifi size={14} />
+                  </span>
+                  <span className="truncate">{row.keyword}</span>
+                </div>
+
+                {/* Type pill */}
+                <div>
+                  <span className="inline-flex items-center gap-1 rounded-md border border-[#E7EAF0] bg-[#F6F8FB] px-2 py-0.5 text-[11px] text-[#6B7280]">
+                    {row.type === "Informational" ? <FileText size={12} /> : <Link2 size={12} />}
+                    {row.type}
+                  </span>
+                </div>
+
+                {/* Search volume */}
+                <div className="tabular-nums text-[#2B3040]">{row.volume.toLocaleString()}</div>
+
+                {/* Difficulty w/ animated bar */}
+                <div className="flex items-center gap-2 text-[#2B3040]">
+                  <span className="tabular-nums">{row.difficulty}%</span>
+                  <DifficultyBar value={row.difficulty} progress={seoTableProg} />
+                </div>
+
+                {/* Suggested topic (ellipsis) */}
+                <div className="text-[#6B7280] truncate">The information shown here...</div>
+
+                {/* Blog button */}
+                <div>
+                  <button className="inline-flex items-center justify-center rounded-full border border-[#BBD5FF] bg-[#F3F7FF] px-4 py-1.5 text-[12px] font-semibold text-[#3178C6]">
+                    Generate
+                  </button>
+                </div>
+
+                {/* Page button */}
+                <div>
+                  <button className="inline-flex items-center justify-center rounded-full border border-[#BBD5FF] bg-[#F3F7FF] px-4 py-1.5 text-[12px] font-semibold text-[#3178C6]">
+                    Generate
+                  </button>
+                </div>
+
+                {/* Preference icons */}
+                <div className="flex items-center gap-3 text-[#A1A7B3]">
+                  <ThumbsUp size={16} className="hover:text-[#6B7280] cursor-pointer" />
+                  <ThumbsDown size={16} className="hover:text-[#6B7280] cursor-pointer" />
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          {/* footer */}
+          <div className="flex justify-end border-t border-[#ECEFF5] bg-[#F8FAFC] px-4 py-3">
+            <button className="inline-flex items-center gap-2 rounded-full border border-[#DDE3ED] bg-white px-3 py-1.5 text-[12px] text-[#566072] hover:bg-[#FAFBFD]">
+              View all page issue <ChevronRight size={14} />
+            </button>
+          </div>
+        </div>
 
       </div>
     </main>
