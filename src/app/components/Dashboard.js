@@ -1,5 +1,6 @@
 // src/components/Dashboard.js
 "use client";
+import Image from "next/image";
 
 import {
   ShieldCheck,
@@ -1317,14 +1318,20 @@ export default function Dashboard() {
             {/* 5 brand tiles w/ real logos from /public/brands */}
             <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-5">
               {[
-                { name: "GPT",        ratio: "2/5", pages: "2.1k Pages", src: "/brands/openai.svg" },
-                { name: "GOOGLE Ai",  ratio: "2/5", pages: "1.9k Pages", src: "/brands/google-g.svg" },
-                { name: "PERPLEXITY", ratio: "2/5", pages: "1.3k Pages", src: "/brands/perplexity.svg" },
-                { name: "COPILOT",    ratio: "2/5", pages: "1.8k Pages", src: "/brands/copilot.svg" },
-                { name: "GEMINI",     ratio: "2/5", pages: "2.3k Pages", src: "/brands/gemini.svg" },
+                { name: "GPT",        ratio: "2/5", pages: "2.1k Pages", src: "/assets/gpt.svg" },
+                { name: "GOOGLE Ai",  ratio: "2/5", pages: "1.9k Pages", src: "/assets/google.svg" },
+                { name: "PERPLEXITY", ratio: "2/5", pages: "1.3k Pages", src: "/assets/perplexity.svg" },
+                { name: "COPILOT",    ratio: "2/5", pages: "1.8k Pages", src: "/assets/copilot.svg" },
+                { name: "GEMINI",     ratio: "2/5", pages: "2.3k Pages", src: "/assets/gemini.svg" },
               ].map((b) => (
                 <div key={b.name} className="rounded-[12px] border border-[#EDF1F5] bg-[#FAFBFD] p-4 text-center">
-                  <img src={b.src} alt={b.name} className="mx-auto mb-2 h-9 w-9" />
+                <Image
+                  src={b.src}
+                  alt={b.name}
+                  width={36}
+                  height={36}
+                  className="mx-auto mb-2"
+                />
                   <div className="text-[12px] text-[#6B7280]">{b.name}</div>
                   <div className="mt-1 text-[22px] font-semibold leading-none text-[#151824] tabular-nums">
                     {matrixNum}<span className="text-[#6B7280]">/5</span>
