@@ -56,7 +56,7 @@ export default function Dashboard() {
     const start = performance.now();
     const step = (now) => {
       const t = Math.min(1, (now - start) / DURATION);
-      const ease = 1 - Math.pow(1 - t, 3);
+      const ease = Math.max(0, Math.min(1, 1 - Math.pow(1 - t, 3)));
       setDrValue(DR_TARGET * ease);
       setDrWidth(DR_BAR * ease);
       if (t < 1) rafRef.current = requestAnimationFrame(step);
@@ -311,7 +311,7 @@ export default function Dashboard() {
       const tick = (now) => {
         const t = Math.min(1, (now - start) / DURATION);
         const ease = 1 - Math.pow(1 - t, 3);
-        setOppCounts(TARGETS.map((n) => Math.round(n * ease)));
+        setOppCounts(TARGETS.map((n) => Math.max(0, Math.round(n * ease))));
         if (t < 1) raf = requestAnimationFrame(tick);
       };
       raf = requestAnimationFrame(tick);
@@ -352,16 +352,21 @@ export default function Dashboard() {
 
     // color-coded animated difficulty bar
     function DifficultyBar({ value, progress = 1 }) {
+      const [mounted, setMounted] = useState(false);
+      useEffect(() => { setMounted(true); }, []);
+
       const pct = Math.max(0, Math.min(100, value));
+      const p   = Math.max(0, Math.min(1, progress));
       const fill = pct < 40 ? "#EF4444" : pct < 70 ? "#F59E0B" : "#10B981";
+
       return (
         <div className="relative h-2 w-24 overflow-hidden rounded-full bg-[#E5E7EB]">
           <div
-            className="h-2 rounded-full"
+            className="h-2 rounded-full w-0"
             style={{
-              width: `${pct * progress}%`,
+              width: `${pct * p}%`,
               backgroundColor: fill,
-              transition: "width 140ms linear",
+              transition: mounted ? "width 140ms linear" : "none",
             }}
           />
         </div>
@@ -442,9 +447,9 @@ export default function Dashboard() {
       status,          // "Published" | "Draft"
       progress = 1,    // <-- pass oppCardsProgress here
     }) {
-      const scoreAnim = Math.round(score * progress);
-      const wordAnim  = Math.round(wordCount * progress);
-      const keyAnim   = Math.round(keywords * progress);
+      const scoreAnim = Math.max(0, Math.round(score * progress));
+      const wordAnim  = Math.max(0, Math.round(wordCount * progress));
+      const keyAnim   = Math.max(0, Math.round(keywords * progress));
       const pri = getPriority(score);
 
       return (
